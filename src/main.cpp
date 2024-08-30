@@ -1,29 +1,51 @@
 #include "file_processor.h"
 #include "directory_processor.h"
 #include "utils.h"
+
 #include <filesystem>
+#include <iomanip>
+#include <fstream>
 #include <set>
 #include <iostream>
 
 using namespace std;
+namespace fs = filesystem;
 
-void printReport(int fileCount, LineCounts &counts)
+void printReport(int fileCount, LineCounts &counts, string folderName, string path)
 {
-    cout << "--------------------------------------------------------------------------------------------------" << endl;
-    cout << setw(6) << "Files" << setw(8) << "Lines" << setw(8) << "Code"
-         << setw(10) << "Comments" << setw(8) << "Blanks" << endl;
-    cout << "--------------------------------------------------------------------------------------------------" << endl;
-    cout << setw(6) << fileCount << setw(8) << counts.total << setw(8) << counts.code
-         << setw(10) << counts.comments << setw(8) << counts.blanks << endl;
-    cout << "--------------------------------------------------------------------------------------------------" << endl;
+    // Create directory if it does not exist
+    if (!fs::exists(folderName))
+    {
+        fs::create_directory(folderName);
+    }
+
+    // Open file in the specified directory
+    ofstream reportFile(fs::path(folderName) / "report.txt");
+    if (!reportFile)
+    {
+        cerr << "Error opening file for writing" << endl;
+        return;
+    }
+
+    // Write the report to the file
+    reportFile << path << endl;
+    reportFile << "--------------------------------------------------------------------------------------------------" << endl;
+    reportFile << setw(6) << "Files" << setw(8) << "Lines" << setw(8) << "Code"
+               << setw(10) << "Comments" << setw(8) << "Blanks" << endl;
+    reportFile << "--------------------------------------------------------------------------------------------------" << endl;
+    reportFile << setw(6) << fileCount << setw(8) << counts.total << setw(8) << counts.code
+               << setw(10) << counts.comments << setw(8) << counts.blanks << endl;
+    reportFile << "--------------------------------------------------------------------------------------------------" << endl;
+
+    // Close the file
+    reportFile.close();
 }
 
 int main(int argc, char *argv[])
 {
     LineCounts counts;
-    int fileCount = 0;
-    std::string extension, path;
-    std::set<std::string> validExtensions = {".c", ".cpp", ".cc"};
+    string extension, path;
+    set<std::string> validExtensions = {".c", ".cpp", ".cc"};
 
     if (argc < 2)
     {
@@ -46,11 +68,11 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cerr << "The path provided is neither a valid file nor a directory with source files." << std::endl;
+        cerr << "The path provided is neither a valid file nor a directory with source files." << std::endl;
         return 1;
     }
 
-    printReport(fileCount, counts);
+    printReport(counts.fileCounts, counts, "report", path);
 
     return 0;
 }

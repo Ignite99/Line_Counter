@@ -53,6 +53,7 @@ case "$1" in
         build
         ;;
     run)
+        build
         shift
         run "$@"
         ;;

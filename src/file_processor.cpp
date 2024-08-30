@@ -7,26 +7,56 @@
 
 using namespace std;
 
+void checkBeforeComment(string trimmedLine, LineCounts &counts, string type, std::ofstream &outputFile)
+{
+    string beforeComment;
+
+    beforeComment = trimmedLine.substr(0, trimmedLine.find(type));
+    beforeComment = regex_replace(beforeComment, regex("^\\s+|\\s+$"), "");
+    if (!beforeComment.empty())
+    {
+        // outputFile << trimmedLine << endl;
+        counts.code++;
+    }
+    else
+    {
+        counts.comments++;
+    }
+}
+
+bool hasQuoteBefore(const string &line, size_t pos)
+{
+    return pos > 0 && line.find('"', 0) < pos;
+}
+
+bool hasQuoteAfter(const string &line, size_t pos)
+{
+    return line.find('"', pos) != string::npos;
+}
+
 void processFile(const std::string &filename, LineCounts &counts)
 {
-    string line;
-    bool inMultiLineComment = false;
-
+    string line, trimmedLine;
     ifstream file(filename);
+    bool inMultiLineComment = false;
+    regex commentRegex(R"((\/\*[\s\S]*\*\/)|(\/\/.*$))");
+
+    std::ofstream outputFile("output.txt");
+
     if (!file.is_open())
     {
         cerr << "Unable to open file: " << filename << endl;
         return;
     }
-    regex commentRegex(R"((\/\*[\s\S]*\*\/)|(\/\/.*$))");
 
     while (getline(file, line))
     {
         counts.total++;
-        string trimmedLine = regex_replace(line, regex("^\\s+|\\s+$"), "");
+        trimmedLine = regex_replace(line, regex("^\\s+|\\s+$"), "");
 
         if (trimmedLine.empty())
         {
+            // outputFile << trimmedLine << endl;
             counts.blanks++;
         }
         else if (inMultiLineComment)
@@ -39,30 +69,34 @@ void processFile(const std::string &filename, LineCounts &counts)
         }
         else if (trimmedLine.find("/*") != string::npos)
         {
-            counts.comments++;
+            checkBeforeComment(trimmedLine, counts, "/*", outputFile);
             if (trimmedLine.find("*/") == string::npos)
             {
-                inMultiLineComment = true;
+                size_t startPos = trimmedLine.find("/*");
+                bool quoteBefore = hasQuoteBefore(trimmedLine, startPos);
+                bool quoteAfter = hasQuoteAfter(trimmedLine, startPos + 2);
+
+                if (quoteAfter == true && quoteBefore == true)
+                {
+                    inMultiLineComment = false;
+                }
+                else
+                {
+                    inMultiLineComment = true;
+                }
             }
         }
         else if (regex_search(trimmedLine, commentRegex))
         {
-            string beforeComment = trimmedLine.substr(0, trimmedLine.find("//"));
-            beforeComment = regex_replace(beforeComment, regex("^\\s+|\\s+$"), "");
-            if (!beforeComment.empty())
-            {
-                counts.code++;
-            }
-            else
-            {
-                counts.comments++;
-            }
+            checkBeforeComment(trimmedLine, counts, "//", outputFile);
         }
         else
         {
+            // outputFile << trimmedLine << endl;
             counts.code++;
         }
     }
 
+    outputFile.close();
     file.close();
 }

@@ -3,6 +3,9 @@
 #include "utils.h"
 
 #include <filesystem>
+#include <iostream>
+#include <string>
+#include <set>
 
 using namespace std;
 namespace fs = filesystem;
@@ -22,7 +25,7 @@ void processDirectory(std::string &directory, LineCounts &counts)
     }
 }
 
-int countFiles(std::string &directory, std::set<std::string> &validExtensions)
+int countFiles(string &directory, set<string> &validExtensions)
 {
     int fileCount = 0;
     for (auto &entry : fs::recursive_directory_iterator(directory))
@@ -32,6 +35,7 @@ int countFiles(std::string &directory, std::set<std::string> &validExtensions)
             string extension = entry.path().extension().string();
             if (isValidSourceFile(extension, validExtensions))
             {
+                std::cout << "File path: " << entry.path().string() << std::endl;
                 fileCount++;
             }
         }
