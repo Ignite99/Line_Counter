@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void checkBeforeComment(string trimmedLine, LineCounts &counts, string type, std::ofstream &outputFile)
+void checkBeforeComment(string trimmedLine, LineCounts &counts, string type)
 {
     string beforeComment;
 
@@ -15,7 +15,6 @@ void checkBeforeComment(string trimmedLine, LineCounts &counts, string type, std
     beforeComment = regex_replace(beforeComment, regex("^\\s+|\\s+$"), "");
     if (!beforeComment.empty())
     {
-        // outputFile << trimmedLine << endl;
         counts.code++;
     }
     else
@@ -41,8 +40,6 @@ void processFile(const std::string &filename, LineCounts &counts)
     bool inMultiLineComment = false;
     regex commentRegex(R"((\/\*[\s\S]*\*\/)|(\/\/.*$))");
 
-    std::ofstream outputFile("output.txt");
-
     if (!file.is_open())
     {
         cerr << "Unable to open file: " << filename << endl;
@@ -56,7 +53,6 @@ void processFile(const std::string &filename, LineCounts &counts)
 
         if (trimmedLine.empty())
         {
-            // outputFile << trimmedLine << endl;
             counts.blanks++;
         }
         else if (inMultiLineComment)
@@ -69,7 +65,7 @@ void processFile(const std::string &filename, LineCounts &counts)
         }
         else if (trimmedLine.find("/*") != string::npos)
         {
-            checkBeforeComment(trimmedLine, counts, "/*", outputFile);
+            checkBeforeComment(trimmedLine, counts, "/*");
             if (trimmedLine.find("*/") == string::npos)
             {
                 size_t startPos = trimmedLine.find("/*");
@@ -88,15 +84,13 @@ void processFile(const std::string &filename, LineCounts &counts)
         }
         else if (regex_search(trimmedLine, commentRegex))
         {
-            checkBeforeComment(trimmedLine, counts, "//", outputFile);
+            checkBeforeComment(trimmedLine, counts, "//");
         }
         else
         {
-            // outputFile << trimmedLine << endl;
             counts.code++;
         }
     }
 
-    outputFile.close();
     file.close();
 }

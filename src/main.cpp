@@ -19,15 +19,15 @@ void printReport(int fileCount, LineCounts &counts, string folderName, string pa
         fs::create_directory(folderName);
     }
 
-    // Open file in the specified directory
+    // Open file in the specified directory to log output
     ofstream reportFile(fs::path(folderName) / "report.txt");
     if (!reportFile)
     {
-        cerr << "Error opening file for writing" << endl;
+        cerr << "Error opening report file for writing" << endl;
         return;
     }
 
-    // Write the report to the file
+    // Write report to report.txt file
     reportFile << path << endl;
     reportFile << "--------------------------------------------------------------------------------------------------" << endl;
     reportFile << setw(6) << "Files" << setw(8) << "Lines" << setw(8) << "Code"
@@ -37,7 +37,6 @@ void printReport(int fileCount, LineCounts &counts, string folderName, string pa
                << setw(10) << counts.comments << setw(8) << counts.blanks << endl;
     reportFile << "--------------------------------------------------------------------------------------------------" << endl;
 
-    // Close the file
     reportFile.close();
 }
 
@@ -45,30 +44,30 @@ int main(int argc, char *argv[])
 {
     LineCounts counts;
     string extension, path;
-    set<std::string> validExtensions = {".c", ".cpp", ".cc"};
+    set<string> validExtensions = {".c", ".cpp", ".cc"};
 
     if (argc < 2)
     {
-        std::cerr << "[ERROR] Usage: " << argv[0] << " <path_to_directory>/<path_to_file>" << std::endl;
+        cerr << "[ERROR] Usage: " << argv[0] << " <path_to_directory>/<path_to_file>" << endl;
         return 1;
     }
 
     path = argv[1];
-    extension = std::filesystem::path(path).extension().string();
+    extension = fs::path(path).extension().string();
 
-    if (std::filesystem::is_regular_file(path) && isValidSourceFile(extension, validExtensions))
+    if (fs::is_regular_file(path) && isValidSourceFile(extension, validExtensions))
     {
         counts.fileCounts = 1;
         processFile(path, counts);
     }
-    else if (std::filesystem::is_directory(path))
+    else if (fs::is_directory(path))
     {
         counts.fileCounts = countFiles(path, validExtensions);
         processDirectory(path, counts);
     }
     else
     {
-        cerr << "The path provided is neither a valid file nor a directory with source files." << std::endl;
+        cerr << "The path provided is not a valid file or a directory with the files that are valid for tabulating." << endl;
         return 1;
     }
 

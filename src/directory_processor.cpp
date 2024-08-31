@@ -35,7 +35,6 @@ int countFiles(string &directory, set<string> &validExtensions)
             string extension = entry.path().extension().string();
             if (isValidSourceFile(extension, validExtensions))
             {
-                std::cout << "File path: " << entry.path().string() << std::endl;
                 fileCount++;
             }
         }
