@@ -36,36 +36,41 @@ Line_Counter/
 
 ## Specifications
 
-### Windows Subsystem for Linux (WSL)
-This project is done in wsl, ideally, any system with the relevant c libraries and can use bash script can run this file.
-
-### Windows (not advised)
-During past development with C/C++, I have noted library glibc wasn't present in some windows systems including mine when creating my own compiler, which caused a host of issues. To avoid this, I try to avoid windows development in C/C++ now. 
+### Windows Subsystem for Linux (WSL) (Recommended)
+`This project is done in wsl`, ideally, any system with the relevant C libraries and can use bash script can run this file. 
 
 ### Linux (Ubuntu, Debian etc.)
 Able to run them. As long as you have the relevant C/C++ libraries.
 
+### Windows (Not recommended)
+During past development with C/C++, I have noted library glibc wasn't present in some windows systems including mine when creating my own compiler, which caused a host of issues. To avoid this, I try to avoid windows development in C/C++ now.
+
 ## How to run
 
-1) Ensure you are able to run .sh files in your system and have given the relevant access to it:
+1) Ensure you are able to run bash files in your system and have given the relevant access to it:
 ```
 chmod +X ./manager.sh
 ```
 2) Now run it:
 ```
-./manager.sh run <path/from/current/directory/to/target/directory/or/File>
+./manager.sh run <path/from/current/directory/to/target/directory/or/file>
 ```
 
-This will auto clean, build and run the project everytime it is run for smooth usage. `manager.sh` also can run its isolated parts as well:
+This will auto clean, build and run the project everytime it is run for smooth usage. `manager.sh` also can be run in its isolated parts as well:
 
 1) To build the project
 ```
 ./manager.sh build
 ```
-2) To clean the project of binary files
+2) To clean the project of binary/obj files
 ```
 ./manager.sh clean
 ```
+3) If wish to run the .exe file directly, I have stored it in the bin/ folder
+```
+./bin/line_counter.exe <path/from/current/directory/to/target/directory/or/file>
+```
+
 
 **Note that the path is the path from the user's current terminal directory to the target directory/file.**
 
@@ -186,18 +191,31 @@ SUM:                           104           6119           7489          42432
 ### Difference between comment vs code line definiton for cloc vs my own implementation
 
 As can be seen above, when checking the folder there is a difference of code and comments between my implementation and cloc's, 30450 vs 30443 and 3971 vs 3978.
+Sadly I have not deduced why that is, but I have come to a few conclusions.
 
-I have reduced the possible possibilities with the parsing to a few factors as well as narrowed down this discrepancy to imgui/imgui_demo.cpp:
-
-The code for the file with this discrepancy is the only one that has double comments in the same line. Stuff like this:
+I assume that is because of comments like this:
 ```
-// Test etststtatstasdasdas // addtional comment syntax after comment
+{
+    ...
+} // asdasdasdsad
+
+OR
+
+{
+    ...
+} /*
+
+asdasdasd
+
+*/
 ```
 
-which could have led to a confusion of a more than one comment in the same line, line 266 is a prime example of one of this case. 
+In the 2 cases, the closing bracket is simply a small part of the code, and the comment takes up more space thus perhaps cloc determines it is a comment. My implementaion however follows along with the instruction sheet given that if code + comment, then is just code. Thus perhaps this is the reason why my implementation has more code then cloc's implementation.
 
-## Conclusions and regrets on my end
+If my implementation is wrong, my implementation so far has a `38423/38430 = 99.9981785063752%` chance of success for only code with code/comment lines not blank lines. 
 
-There are some issues on my end too, in terms of speed compared to cloc it is much slower, 3-5 seconds slower when it came to parsing a folder. 
+## Conclusions and Improvements
 
-Accessibility to files could've been improved as well by pushing this to docker so that it can be run in windows as well. 
+There are some issues on my end too, in terms of speed compared to cloc it is much slower, 3-5 seconds slower when it came to parsing a folder. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts.
+
+Accessibility to files could've been improved as well by pushing this to docker so that it can be run in windows as well. However, that was not what cloc did so I did not do it as well.
