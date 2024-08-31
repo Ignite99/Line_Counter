@@ -10,14 +10,20 @@
 using namespace std;
 namespace fs = filesystem;
 
-void processDirectory(std::string &directory, LineCounts &counts)
+// Called when main.cpp iterates through the directory path to process the files
+void processDirectory(string &directory, LineCounts &counts, set<string> &validExtensions)
 {
+    string extension;
+
+    // Iterate through directory
     for (auto &entry : fs::recursive_directory_iterator(directory))
     {
+        // Check if it is a file
         if (entry.is_regular_file())
         {
-            string extension = entry.path().extension().string();
-            if (extension == ".c" || extension == ".cpp" || extension == ".cc")
+            // Check if it is a valid extension
+            extension = entry.path().extension().string();
+            if (isValidSourceFile(extension, validExtensions))
             {
                 processFile(entry.path().string(), counts);
             }
@@ -25,14 +31,20 @@ void processDirectory(std::string &directory, LineCounts &counts)
     }
 }
 
+// Counts number of files in said directory
 int countFiles(string &directory, set<string> &validExtensions)
 {
     int fileCount = 0;
+    string extension;
+
+    // Iterates through directory
     for (auto &entry : fs::recursive_directory_iterator(directory))
     {
+        // Check if it is a file
         if (entry.is_regular_file())
         {
-            string extension = entry.path().extension().string();
+            // Check if extension is part of the valid set of extensions
+            extension = entry.path().extension().string();
             if (isValidSourceFile(extension, validExtensions))
             {
                 fileCount++;

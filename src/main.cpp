@@ -11,6 +11,7 @@
 using namespace std;
 namespace fs = filesystem;
 
+// Prints results to report/report.txt
 void printReport(int fileCount, LineCounts &counts, string folderName, string path)
 {
     // Create directory if it does not exist
@@ -44,8 +45,10 @@ int main(int argc, char *argv[])
 {
     LineCounts counts;
     string extension, path;
+    // Passed along functions as a check if it meets the extension criteria
     set<string> validExtensions = {".c", ".cpp", ".cc"};
 
+    // Check if number of arguments is correct
     if (argc < 2)
     {
         cerr << "[ERROR] Usage: " << argv[0] << " <path_to_directory>/<path_to_file>" << endl;
@@ -55,22 +58,26 @@ int main(int argc, char *argv[])
     path = argv[1];
     extension = fs::path(path).extension().string();
 
+    // Check if path is a regular file/file is valid extension
     if (fs::is_regular_file(path) && isValidSourceFile(extension, validExtensions))
     {
         counts.fileCounts = 1;
         processFile(path, counts);
     }
+    // Check if path is to a directory, in this scenario the valid extension check is passed on to countFiles
     else if (fs::is_directory(path))
     {
         counts.fileCounts = countFiles(path, validExtensions);
-        processDirectory(path, counts);
+        processDirectory(path, counts, validExtensions);
     }
+    // Error catch
     else
     {
         cerr << "The path provided is not a valid file or a directory with the files that are valid for tabulating." << endl;
         return 1;
     }
 
+    // Prints report
     printReport(counts.fileCounts, counts, "report", path);
 
     return 0;

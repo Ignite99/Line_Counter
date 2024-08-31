@@ -3,7 +3,8 @@
 ## Project Description
 Time complexity on my project is O(n^2) with space complexity O(1).
 
-Purpose of this project is to mimic the functionality shown in 'cloc'  terminal commmand which tabulates the files, blanks, comments and code lines in a specific file/directory.
+Purpose of this project is to mimic the functionality shown in 'cloc' terminal commmand which tabulates the files, blanks, comments and code lines in a specific file/directory. Thus I will be closely comparing functionality of my project with 'cloc' as a basis. I have also discovered issues present within the 'cloc' implementation
+according to my version ubuntu 22.04 using github.com/AlDanial/cloc which I will discuss later in issues section.
 
 The project seeks to do the same similar to cloc in this regard. The `project structure` is as follows:
 ```
@@ -124,7 +125,7 @@ There is no header count nor is there any sum count for this project.
 - I used regex search due to speed as well. For line based searches, especially since I want to handle multiple cases with a single expression, I resorted to this. Later when multiline block comments with `specific edge cases` popped up, I had to resort to the traditional if-else and .find() methods.
 - Chose to place the .h files in src instead of include as I think that main functionality should all be placed in src even h files, stuff like the line_counts.h in /include folder is a struct thus I think it should be put there.
 
-## Issues discovered
+## Issues discovered in cloc when doing comparisons with my own implementation
 
 ### File parsing issue with cloc
 
@@ -164,7 +165,8 @@ File path: ./test-libs/Osiris/jsoncpp.cpp
 File path: ./test-libs/Osiris/GUI.cpp
 ```
 
-According to my implementation it is thus 30 files as seen below, tallied up correctly with me physically checking said folder of the files:
+According to my implementation it is thus 30 files as seen above and below, tallied up correctly with me physically checking said folder
+from the files around 28 times as well:
 ```
 ./test-libs/Osiris/
 -------------------------------------------------------------------------------
@@ -176,7 +178,6 @@ According to my implementation it is thus 30 files as seen below, tallied up cor
 
 And yet cloc itself didn't detect one of them:
 ```
-github.com/AlDanial/cloc v 1.90  T=0.22 s (475.1 files/s, 255996.8 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
@@ -188,34 +189,69 @@ SUM:                           104           6119           7489          42432
 -------------------------------------------------------------------------------
 ```
 
-### Difference between comment vs code line definiton for cloc vs my own implementation
+### Cloc does not catch mutliline comments in string literals
 
 As can be seen above, when checking the folder there is a difference of code and comments between my implementation and cloc's, 30450 vs 30443 and 3971 vs 3978.
-Sadly I have not deduced why that is, but I have come to a few conclusions.
 
-I assume that is because of comments like this:
+Cloc implementation:
 ```
-{
-    ...
-} // asdasdasdsad
-
-OR
-
-{
-    ...
-} /*
-
-asdasdasd
-
-*/
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+C++                             29           4009           3978          30443
+```
+My implementation:
+```
+./test-libs/Osiris/
+-------------------------------------------------------------------------------
+ Files   Lines    Code  Comments  Blanks
+-------------------------------------------------------------------------------
+    30   38430   30450      3971    4009
+-------------------------------------------------------------------------------
 ```
 
-In the 2 cases, the closing bracket is simply a small part of the code, and the comment takes up more space thus perhaps cloc determines it is a comment. My implementaion however follows along with the instruction sheet given that if code + comment, then is just code. Thus perhaps this is the reason why my implementation has more code then cloc's implementation.
+I have tested it out and there are issues in the cloc implementation, that being if a multiline comment is caught in a string literal,
+it is not counted as a string, but a comment.
 
-If my implementation is wrong, my implementation so far has a `38423/38430 = 99.9981785063752%` chance of success for only code with code/comment lines not blank lines. 
+Take the example below (sample from imgui_demo.cpp line 966, if line number changed feel free to search):
+```
+
+static char text[1024 * 16] =
+    "/*\n"
+    " The Pentium F00F bug, shorthand for F0 0F C7 C8,\n"
+    " the hexadecimal encoding of one offending instruction,\n"
+    " more formally, the invalid operand with locked CMPXCHG8B\n"
+    " instruction bug, is a design flaw in the majority of\n"
+    " Intel Pentium, Pentium MMX, and Pentium OverDrive\n"
+    " processors (all in the P5 microarchitecture).\n"
+    "*/\n\n"
+```
+
+From here it can be seen that these are 9 lines of code, as it is all within a string. However this was the result of cloc after I isolated the code block
+from the imgui_demo file:
+```
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+C++                              1              1              7              2
+-------------------------------------------------------------------------------
+```
+The next set of data is my implementation:
+```
+-------------------------------------------------------------------------------
+ Files   Lines    Code  Comments  Blanks
+-------------------------------------------------------------------------------
+     1      10       9         0       1
+-------------------------------------------------------------------------------
+```
+Moreover from the above implementation, it can even be seen that one of the comments implemented in cloc bled into the code section. This is because cloc
+considers either the `"/*\n"` or the `"*/\n\n"` lines as code. When one of them is removed the other is immediately considered a code block and the rest
+converted to comments.
+
+To my understanding there are different implementations of cloc within github.com/AlDanial/cloc works depending on the language involved in its development. I have also not tested this across other OS's as well, perhaps the implementation varies on the OS as well. However as of ubuntu 22.04 github.com/AlDanial/cloc version seems to have an error with comments in string literals for C++.
 
 ## Conclusions and Improvements
 
-There are some issues on my end too, in terms of speed compared to cloc it is much slower, 3-5 seconds slower when it came to parsing a folder. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts.
+There are some issues on my end too, in terms of speed compared to cloc, it is much slower. 3-5 seconds slower when it came to parsing a folder. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts. `Race Condition` will most certainly occur if I am not careful.
 
 Accessibility to files could've been improved as well by pushing this to docker so that it can be run in windows as well. However, that was not what cloc did so I did not do it as well.
