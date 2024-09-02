@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# My compiler flags
+# My compiler flags, also make sure this is in LF btw
 CXX=g++
 CXXFLAGS="-std=c++17 -Wall -Iinclude"
 

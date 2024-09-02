@@ -1,4 +1,4 @@
-# Use a base image with necessary tools
+# Make sure when doing this your end of line sequence is in LF
 FROM gcc:latest
 
 # Create and set the working directory
