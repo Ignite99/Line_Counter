@@ -12,7 +12,7 @@ using namespace std;
 namespace fs = filesystem;
 
 // Prints results to report/report.txt
-void printReport(int fileCount, LineCounts &counts, string folderName, string path)
+void outputReport(int fileCount, LineCounts &counts, string folderName, string path)
 {
     // Create directory if it does not exist
     if (!fs::exists(folderName))
@@ -37,6 +37,16 @@ void printReport(int fileCount, LineCounts &counts, string folderName, string pa
     reportFile << setw(6) << fileCount << setw(8) << counts.total << setw(8) << counts.code
                << setw(10) << counts.comments << setw(8) << counts.blanks << endl;
     reportFile << "--------------------------------------------------------------------------------------------------" << endl;
+
+    // Output to terminal
+    cout << path << endl;
+    cout << "--------------------------------------------------------------------------------------------------" << endl;
+    cout << setw(6) << "Files" << setw(8) << "Lines" << setw(8) << "Code"
+         << setw(10) << "Comments" << setw(8) << "Blanks" << endl;
+    cout << "--------------------------------------------------------------------------------------------------" << endl;
+    cout << setw(6) << fileCount << setw(8) << counts.total << setw(8) << counts.code
+         << setw(10) << counts.comments << setw(8) << counts.blanks << endl;
+    cout << "--------------------------------------------------------------------------------------------------" << endl;
 
     reportFile.close();
 }
@@ -88,7 +98,7 @@ int main(int argc, char *argv[])
     }
 
     // Prints report
-    printReport(counts.fileCounts, counts, "report", path);
+    outputReport(counts.fileCounts, counts, "report", path);
 
     return 0;
 }

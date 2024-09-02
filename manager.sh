@@ -8,6 +8,7 @@ CXXFLAGS="-std=c++17 -Wall -Iinclude"
 SRC_DIR=src
 OBJ_DIR=obj
 BIN_DIR=bin
+REPORT_DIR=report
 
 # Find all .cpp source files in the source directory
 SOURCES=$(find $SRC_DIR -name '*.cpp')
@@ -59,6 +60,7 @@ clean() {
     echo "Cleaning up build artifacts..."
     rm -rf $OBJ_DIR
     rm -rf $BIN_DIR
+    rm -rf $REPORT_DIR
     echo "Clean completed."
 }
 
