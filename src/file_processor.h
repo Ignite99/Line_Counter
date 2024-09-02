@@ -2,4 +2,5 @@
 #include <string>
 #include "line_counts.h"
 
-void processFile(const std::string &filename, LineCounts &counts);
+void processCPPFile(const std::string &filename, LineCounts &counts);
+void processRubyFile(const std::string &filename, LineCounts &counts);

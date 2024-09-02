@@ -35,6 +35,7 @@ void checkBeforeComment(string trimmedLine, LineCounts &counts, string commentSy
     // If not empty before the comment syntax, it is a code line
     if (!beforeComment.empty())
     {
+        // cout << trimmedLine << endl;
         counts.code++;
     }
     // If nothing else before comment syntax then it is a comment line
@@ -45,9 +46,11 @@ void checkBeforeComment(string trimmedLine, LineCounts &counts, string commentSy
 }
 
 // Process the file targeted from directory_processor.cpp
-void processFile(const string &filename, LineCounts &counts)
+void processCPPFile(const string &filename, LineCounts &counts)
 {
     string line, trimmedLine;
+    size_t startPos;
+    bool quoteBefore, quoteAfter;
     ifstream file(filename);
 
     // Specific check for multiline comment header /* */
@@ -100,9 +103,9 @@ void processFile(const string &filename, LineCounts &counts)
             if (trimmedLine.find("*/") == string::npos)
             {
                 // Another check if multiline comment syntax is within a string literal
-                size_t startPos = trimmedLine.find("/*");
-                bool quoteBefore = hasQuoteBefore(trimmedLine, startPos);
-                bool quoteAfter = hasQuoteAfter(trimmedLine, startPos + 2);
+                startPos = trimmedLine.find("/*");
+                quoteBefore = hasQuoteBefore(trimmedLine, startPos);
+                quoteAfter = hasQuoteAfter(trimmedLine, startPos + 2);
 
                 // If /* is nested in a string, then it is code not a multiline comment starter
                 if (quoteAfter == true && quoteBefore == true)
@@ -129,4 +132,64 @@ void processFile(const string &filename, LineCounts &counts)
     }
 
     file.close();
+}
+
+void processRubyFile(const string &filename, LineCounts &counts)
+{
+    string line, trimmedLine;
+    size_t startPos;
+    bool quoteBefore, quoteAfter;
+    ifstream file(filename);
+    bool inMultiLineComment = false;
+
+    if (!file.is_open())
+    {
+        cerr << "Unable to open file: " << filename << endl;
+        return;
+    }
+
+    while (getline(file, line))
+    {
+        counts.total++;
+        trimmedLine = regex_replace(line, regex(clearWhiteSpace), "");
+        if (trimmedLine.empty())
+        {
+            counts.blanks++;
+        }
+        else if (inMultiLineComment)
+        {
+            counts.comments++;
+            if (trimmedLine.find("=end") != string::npos)
+            {
+                inMultiLineComment = false;
+            }
+        }
+        else if (trimmedLine.find("=begin") != string::npos)
+        {
+            checkBeforeComment(trimmedLine, counts, "=begin");
+            if (trimmedLine.find("=end") == string::npos)
+            {
+                startPos = trimmedLine.find("=begin");
+                quoteBefore = hasQuoteBefore(trimmedLine, startPos);
+                quoteAfter = hasQuoteAfter(trimmedLine, startPos + 2);
+                if (quoteAfter == true && quoteBefore == true)
+                {
+                    inMultiLineComment = false;
+                }
+                else
+                {
+                    inMultiLineComment = true;
+                }
+            }
+        }
+        else if (trimmedLine.find("#") == 0)
+        {
+            checkBeforeComment(trimmedLine, counts, "#");
+        }
+        else
+        {
+            // cout << trimmedLine << endl;
+            counts.code++;
+        }
+    }
 }

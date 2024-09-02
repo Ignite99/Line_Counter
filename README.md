@@ -119,11 +119,35 @@ e.g. Line_Counter Output
 
 There is no header count nor is there any sum count for this project.
 
+## Results
+
+For Osiris CPP file
+```
+./test-libs/Osiris/
+-------------------------------------------------------------------------------
+ Files   Lines    Code  Comments  Blanks
+-------------------------------------------------------------------------------
+    30   38430   30450      3971    4009
+-------------------------------------------------------------------------------
+```
+
+For lib3 ruby file
+```
+./test-libs/lib 3//
+-------------------------------------------------------------------------------
+ Files   Lines    Code  Comments  Blanks
+-------------------------------------------------------------------------------
+  1501  297430  216886     46570   33974
+-------------------------------------------------------------------------------
+```
+
 ## Design Choices
 
-- Chose C++ for this project because of speed purposes.
+- Chose C++ for this project because of speed purposesm, especially since lib3 has >1000 ruby files
 - I used regex search due to speed as well. For line based searches, especially since I want to handle multiple cases with a single expression, I resorted to this. Later when multiline block comments with `specific edge cases` popped up, I had to resort to the traditional if-else and .find() methods.
 - Chose to place the .h files in src instead of include as I think that main functionality should all be placed in src even h files, stuff like the line_counts.h in /include folder is a struct thus I think it should be put there.
+- Even if the codeline ended up like this: `} // Example comment insert here`, I still resolved it as a code line.
+- 
 
 ## Issues discovered in cloc when doing comparisons with my own implementation
 
@@ -252,6 +276,6 @@ To my understanding there are different implementations of cloc within github.co
 
 ## Conclusions and Improvements
 
-There are some issues on my end too, in terms of speed compared to cloc, it is much slower. 3-5 seconds slower when it came to parsing a folder. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts. `Race Condition` will most certainly occur if I am not careful.
+There are some issues on my end too, in terms of speed compared to cloc, it is much slower. 7-12 seconds slower when it came to parsing the CPP folder and approx. 29-33 seconds slower for the ruby implementation as it has >1500 files excudling non ruby related files. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts. `Race Condition` will most certainly occur if I am not careful.
 
 Accessibility to files could've been improved as well by pushing this to docker so that it can be run in windows as well. However, that was not what cloc did so I did not do it as well.

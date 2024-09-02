@@ -44,9 +44,10 @@ void printReport(int fileCount, LineCounts &counts, string folderName, string pa
 int main(int argc, char *argv[])
 {
     LineCounts counts;
-    string extension, path;
+    string extension, path, filename;
     // Passed along functions as a check if it meets the extension criteria
-    set<string> validExtensions = {".c", ".cpp", ".cc"};
+    set<string> validExtensions = {".c", ".cpp", ".cc", ".rb", ".rake"};
+    set<string> validFiles = {"Rakefile"};
 
     // Check if number of arguments is correct
     if (argc < 2)
@@ -57,18 +58,26 @@ int main(int argc, char *argv[])
 
     path = argv[1];
     extension = fs::path(path).extension().string();
+    filename = fs::path(path).filename().string();
 
     // Check if path is a regular file/file is valid extension
-    if (fs::is_regular_file(path) && isValidSourceFile(extension, validExtensions))
+    if (fs::is_regular_file(path) && (isValidSourceFile(extension, validExtensions) || isValidFile(filename, validFiles)))
     {
         counts.fileCounts = 1;
-        processFile(path, counts);
+        if (extension == ".rb" || extension == ".rake" || filename == "Rakefile")
+        {
+            processRubyFile(path, counts);
+        }
+        else
+        {
+            processCPPFile(path, counts);
+        }
     }
     // Check if path is to a directory, in this scenario the valid extension check is passed on to countFiles
     else if (fs::is_directory(path))
     {
-        counts.fileCounts = countFiles(path, validExtensions);
-        processDirectory(path, counts, validExtensions);
+        counts.fileCounts = countFiles(path, validExtensions, validFiles);
+        processDirectory(path, counts, validExtensions, validFiles);
     }
     // Error catch
     else
