@@ -30,6 +30,8 @@ Line_Counter/
  |---.gitignore
  |
  |---manager.sh                     (Store commands for compilation/builds)
+ |
+ |---Dockerfile                     (Store my docker image script when docker build and run)
 ```
 
 **This project is done by sticking to a more functional programming style rather than Object Oriented Programming (OOP) more as test to myself. There is still a struct typical of C++, but it is mostly functions.**
