@@ -21,7 +21,7 @@ void processDirectory(string &directory, LineCounts &counts, set<string> &validE
         // Check if it is a file
         if (entry.is_regular_file())
         {
-            // Check if it is a valid extension
+            // Check if it is a valid extension or filename
             extension = entry.path().extension().string();
             filename = entry.path().filename().string();
             if (isValidSourceFile(extension, validExtensions) || isValidFile(filename, validFiles))

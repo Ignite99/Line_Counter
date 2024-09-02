@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     string extension, path, filename;
     // Passed along functions as a check if it meets the extension criteria
     set<string> validExtensions = {".c", ".cpp", ".cc", ".rb", ".rake"};
+    // Passed along functions as a check if it meets the filename criteria
     set<string> validFiles = {"Rakefile"};
 
     // Check if number of arguments is correct
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
     extension = fs::path(path).extension().string();
     filename = fs::path(path).filename().string();
 
-    // Check if path is a regular file/file is valid extension
+    // Check if path is a regular file/file and if (valid extension or valid file)
     if (fs::is_regular_file(path) && (isValidSourceFile(extension, validExtensions) || isValidFile(filename, validFiles)))
     {
         counts.fileCounts = 1;
