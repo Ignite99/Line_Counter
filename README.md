@@ -3,8 +3,7 @@
 ## Project Description
 Time complexity on my project is O(n^2) with space complexity O(1).
 
-Purpose of this project is to mimic the functionality shown in 'cloc' terminal commmand which tabulates the files, blanks, comments and code lines in a specific file/directory. Thus I will be closely comparing functionality of my project with 'cloc' as a basis. I have also discovered issues present within the 'cloc' implementation
-according to my version ubuntu 22.04 using github.com/AlDanial/cloc which I will discuss later in issues section.
+Purpose of this project is to mimic the functionality shown in 'cloc' terminal commmand which tabulates the files, blanks, comments and code lines in a specific file/directory. Thus I will be closely comparing functionality of my project with 'cloc' as a basis. I have also discovered issues present within the 'cloc' implementation according to my version ubuntu 22.04 using github.com/AlDanial/cloc which I will discuss later in issues section. This project is able to track CPP and ruby files.
 
 The project seeks to do the same similar to cloc in this regard. The `project structure` is as follows:
 ```
@@ -37,16 +36,13 @@ Line_Counter/
 
 ## Specifications
 
-### Windows Subsystem for Linux (WSL) (Recommended)
+### Windows Subsystem for Linux(WSL) or Vbox Ubuntu 22.04 distro (Recommended)
 `This project is done in wsl`, ideally, any system with the relevant C libraries and can use bash script can run this file. 
 
-### Linux (Ubuntu, Debian etc.)
-Able to run them. As long as you have the relevant C/C++ libraries.
+### If none of the above, then install docker
+This project can be run in docker as well. If you are on windows system please refer to the docker website for [installation](https://docs.docker.com/desktop/install/windows-install/).
 
-### Windows (Not recommended)
-During past development with C/C++, I have noted library glibc wasn't present in some windows systems including mine when creating my own compiler, which caused a host of issues. To avoid this, I try to avoid windows development in C/C++ now.
-
-## How to run
+## WSL how to run without docker
 
 1) Ensure you are able to run bash files in your system and have given the relevant access to it:
 ```
@@ -71,7 +67,32 @@ This will auto clean, build and run the project everytime it is run for smooth u
 ```
 ./bin/line_counter.exe <path/from/current/directory/to/target/directory/or/file>
 ```
+## Run with docker
 
+1) Copy paste folder in zip into folder of choice. Enter the folder.
+```
+# Copy paste the repository if in zip to the folder of choice.
+cd Line_Counter/
+
+# git clone it but it is not public or given access via collaboraters tag in settings
+```
+
+2) Build the image
+```
+docker build -t line_counter_image .
+```
+
+3) Run the image after it finishes building (depends on OS the command might be different)
+
+`WSL/Virtualbox Ubuntu 22.04 distro `
+```
+docker run --rm -v "$(pwd)":/app -w /app line_counter_image /app/manager.sh run <path/to/destination>
+```
+
+`Windows:`
+```
+docker run --rm -v "%cd%:/app" -w /app line_counter_image /app/manager.sh run <path/to/destination>
+```
 
 **Note that the path is the path from the user's current terminal directory to the target directory/file.**
 
@@ -117,7 +138,8 @@ e.g. Line_Counter Output
 -------------------------------------------------------------------------------
 ```
 
-There is no header count nor is there any sum count for this project.
+There is no cpp header count for this project. I only calculated: (.cpp, .cc, .c, .rb, .rake) and 
+the only file I let throught was the Rakefile.
 
 ## Results
 
@@ -276,6 +298,4 @@ To my understanding there are different implementations of cloc within github.co
 
 ## Conclusions and Improvements
 
-There are some issues on my end too, in terms of speed compared to cloc, it is much slower. 7-12 seconds slower when it came to parsing the CPP folder and approx. 29-33 seconds slower for the ruby implementation as it has >1500 files excudling non ruby related files. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts. `Race Condition` will most certainly occur if I am not careful.
-
-Accessibility to files could've been improved as well by pushing this to docker so that it can be run in windows as well. However, that was not what cloc did so I did not do it as well.
+There are some issues on my end too, in terms of speed compared to cloc, it is much slower when there are more than 100 files. 7-12 seconds slower when it came to parsing the CPP folder and approx. 29-33 seconds slower for the ruby implementation as it has >1500 files excudling non ruby related files. Perhaps spawning threads when calculating the directory could be a method of improvement, concurrency would however be another issue as they would all be writing to the same memory address where I stored my initial count in struct counts. `Race Condition` will most certainly occur if I am not careful. 
